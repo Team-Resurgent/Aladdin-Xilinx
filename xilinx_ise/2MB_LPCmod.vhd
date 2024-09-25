@@ -385,7 +385,7 @@ begin
                     pinout4_xbox_lad <= c_LAD_INPUT_PATTERN;     -- Also when s_lad_dir = '1' for DATA1 and DATA2.
                     if s_lpc_fsm_state = LPC_FSM_GET_ADDR and s_fsm_counter = c_FSM_ADDR_SEQ_NIBBLE1 then
                         pinout4_flash_lad <= c_LAD_ST49LF160C_ADDR_PATTERN1;    -- Last fixed addr bit & MSB Flash chip ID
-                    elsif s_lpc_fsm_state = LPC_FSM_GET_ADDR and s_fsm_counter = c_FSM_ADDR_SEQ_NIBBLE2 then 
+                    elsif s_lpc_fsm_state = LPC_FSM_GET_ADDR and s_fsm_counter = c_FSM_ADDR_SEQ_NIBBLE2 and s_bank /= "1111" then 
 
                         if s_bank(3 downto 2) = "01" then -- User Upper 1mb if bank starts with 01
                             pinout4_flash_lad <= c_LAD_ST49LF160C_ADDR_PATTERN2 & '1'; 
@@ -467,7 +467,7 @@ begin
                                 end if;
                                 s4_gpo(1 downto 0) <= pinout4_xbox_lad(1 downto 0);  
                             when c_LAD_IOREG_WR_CTRL =>
-                               s_os_disable <= pinout4_xbox_lad(1); -- OS indicated to reboot from on-board BIOS. Mute modchip until power cycle.
+                               s_os_disable <= NOT pinout4_xbox_lad(0); -- OS indicated to reboot from on-board BIOS. Mute modchip until power cycle.
                                if s_xodus_reg_base = c_TRUE_STD then
                                     if pinout4_xbox_lad(2) = '1' then
                                         s_temp_tsop_drv <= s_temp_tsop_drv_en;
@@ -476,8 +476,8 @@ begin
                                         s2_os_ctrl_bank_select(0) <= '0';
                                     end if;
                                else
-                                    s_temp_tsop_drv <= pinout4_xbox_lad(0); -- OS controls TSOP banks. 0 of this assume no control and a full TSOP load.
-                                    if pinout4_xbox_lad(3) = '1' then
+                                    s_temp_tsop_drv <= pinout4_xbox_lad(1); -- OS controls TSOP banks. 0 of this assume no control and a full TSOP load.
+                                    if pinout4_xbox_lad(0) = '1' then
                                         s_os_bnkctrl <= c_TRUE_STD; -- Until power cycle. Generates warning that such signal should be set to '1' by default blablabla...
                                     end if;
                                end if;
